@@ -3,13 +3,20 @@
  */
 package lightSheet;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.function.Gaussian;
+
 import mitiv.array.Array1D;
 import mitiv.array.Array3D;
+import mitiv.array.Double1D;
+import mitiv.array.Float1D;
 import mitiv.base.Shape;
 import mitiv.linalg.shaped.DoubleShapedVector;
 import mitiv.linalg.shaped.ShapedVector;
 import mitiv.microscopy.MicroscopeModel;
 import mitiv.microscopy.WideFieldModel;
+import mitiv.old.MathUtils;  // FIXME remove this ugly file
+
 
 /**
  * @author ferreol  <ferreol.soulez@epfl.ch>
@@ -17,17 +24,22 @@ import mitiv.microscopy.WideFieldModel;
  */
 public class LightSheetModel extends MicroscopeModel {
 
-    protected double beamWaist; // Beam waist of the light sheet
+    protected double beamWidth; // Beam waist of the light sheet
     protected WideFieldModel wffm;
-    protected Array1D beamShape;
+    protected Shape beamShape;
+    protected Array1D beam;
+    //   protected Gaussian beamFunc;
+    protected UnivariateFunction beamFunc;
 
 
-
-    public LightSheetModel(Shape psfShape, double NA, double lambda, double ni, double beamWaist, double dxy, double dz, boolean radial,
+    public LightSheetModel(Shape psfShape, double NA, double lambda, double ni, double beamWidth, double dxy, double dz, boolean radial,
             boolean single) {
-        super(psfShape,  dxy, dz, radial, single);
+        super(psfShape,  dxy, dz,  single);
         wffm= new WideFieldModel(psfShape, NA, lambda, ni, dxy, dz, radial, single);
-
+        this.beamWidth = beamWidth;
+        beamShape = new Shape(Nz);
+        beamFunc = new Gaussian(0, beamWidth);
+        //       beam.
     }
 
 
@@ -38,6 +50,13 @@ public class LightSheetModel extends MicroscopeModel {
     @Override
     public void computePSF() {
         wffm.computeDefocus();
+        if (single){
+            beam = Float1D.create(beamShape);
+        }else{
+            beam = Double1D.create(beamShape);
+            beam.assign(Double1D.wrap(MathUtils.fftIndgen(Nz),beamShape));
+
+        }
     }
 
     /* (non-Javadoc)
