@@ -3,9 +3,10 @@
  */
 package lightSheet;
 
-import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.function.Gaussian;
 
+import epifluorescence.WideFieldModel;
+import microscopy.MicroscopeModel;
 import mitiv.array.Array1D;
 import mitiv.array.Array3D;
 import mitiv.array.Double1D;
@@ -13,9 +14,8 @@ import mitiv.array.Float1D;
 import mitiv.base.Shape;
 import mitiv.linalg.shaped.DoubleShapedVector;
 import mitiv.linalg.shaped.ShapedVector;
-import mitiv.microscopy.MicroscopeModel;
-import mitiv.microscopy.WideFieldModel;
 import mitiv.old.MathUtils;  // FIXME remove this ugly file
+import utils.EnclosedUnivariateFunction;
 
 
 /**
@@ -29,7 +29,7 @@ public class LightSheetModel extends MicroscopeModel {
     protected Shape beamShape;
     protected Array1D beam;
     //   protected Gaussian beamFunc;
-    protected UnivariateFunction beamFunc;
+    protected EnclosedUnivariateFunction beamFunc;
 
 
     public LightSheetModel(Shape psfShape, double NA, double lambda, double ni, double beamWidth, double dxy, double dz, boolean radial,
@@ -38,8 +38,8 @@ public class LightSheetModel extends MicroscopeModel {
         wffm= new WideFieldModel(psfShape, NA, lambda, ni, dxy, dz, radial, single);
         this.beamWidth = beamWidth;
         beamShape = new Shape(Nz);
-        beamFunc = new Gaussian(0, beamWidth);
-        //       beam.
+        //  beamFunc = new Gaussian(0, beamWidth);
+        beamFunc = new EnclosedUnivariateFunction(new Gaussian(0, beamWidth),dz);
     }
 
 
@@ -55,7 +55,7 @@ public class LightSheetModel extends MicroscopeModel {
         }else{
             beam = Double1D.create(beamShape);
             beam.assign(Double1D.wrap(MathUtils.fftIndgen(Nz),beamShape));
-
+            ((Double1D) beam).map(beamFunc);
         }
     }
 
