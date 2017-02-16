@@ -1,11 +1,12 @@
 /**
  *
  */
-package lightSheet;
+package microTiPi.lightSheet;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
 
 import epifluorescence.WideFieldModel;
+import microTiPi.microUtils.EnclosedUnivariateFunction;
 import microscopy.MicroscopeModel;
 import mitiv.array.Array1D;
 import mitiv.array.Array3D;
@@ -15,7 +16,6 @@ import mitiv.base.Shape;
 import mitiv.linalg.shaped.DoubleShapedVector;
 import mitiv.linalg.shaped.ShapedVector;
 import mitiv.old.MathUtils;  // FIXME remove this ugly file
-import utils.EnclosedUnivariateFunction;
 
 
 /**
