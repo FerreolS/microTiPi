@@ -40,28 +40,92 @@ import mitiv.linalg.shaped.ShapedVectorSpace;
  */
 public abstract class MicroscopeModel
 {
-    protected int PState=0;   // flag to prevent useless recomputation of the PSF
+    protected int PState=0;             // flag to prevent useless recomputation of the PSF
     protected final static boolean NORMALIZED = true;
     protected static final double DEUXPI = 2*Math.PI;
-    protected double dxy; // the lateral pixel size in meter
-    protected double dz; // the axial sampling step size in meter
-    protected int Nx; // number of samples along lateral X-dimension
-    protected int Ny; // number of samples along lateral Y-dimension
-    protected int Nz; // number of samples along axial Z-dimension
-    protected boolean single = false;
+    protected double dxy;               // the lateral pixel size in meter
+    protected double dz;                // the axial sampling step size in meter
+    protected int Nx;                   // number of samples along lateral X-dimension
+    protected int Ny;                   // number of samples along lateral Y-dimension
+    protected int Nz;                   // number of samples along axial Z-dimension
+    protected boolean single = false;   // computation in single precision
 
-    protected Shape psfShape;
-    protected Array3D psf; //3D point spread function
+    protected Shape psfShape;           // Shape (size) of the PSF
+    protected Array3D psf;              //3D point spread function
 
+<<<<<<< HEAD
     protected DoubleShapedVectorSpace[] parameterSpace;
     protected DoubleShapedVector[] parameterCoefs;
+=======
+    protected DoubleShapedVectorSpace defocusSpace;
+    protected DoubleShapedVectorSpace phaseSpace;
+    protected DoubleShapedVectorSpace modulusSpace;
+    protected DoubleShapedVector modulus_coefs;  // array of Zernike coefficients that describe the modulus
+    protected DoubleShapedVector phase_coefs;  // array of Zernike coefficients that describe the phase
+    protected DoubleShapedVector defocus_coefs;  // array of Zernike coefficients that describe the phase
+
+
+    /**
+     * Compute the PSF and fill the psf property
+     */
+    public  abstract  void computePSF();
+    /**
+     * Getter for the PSF
+     * @return  psf
+     */
+    public  abstract  Array3D getPSF();
+
+    /**
+     * Apply the Jacobian of the modulus to the vector GRAD
+     * @param grad
+     * @return J(grad)
+     */
+    abstract public DoubleShapedVector apply_J_modulus(ShapedVector grad);
+    /**
+     * Apply the Jacobian of the defocus to the vector GRAD
+     * @param grad
+     * @return J(grad)
+     */
+    abstract public DoubleShapedVector apply_J_defocus(ShapedVector grad);
+    /**
+     * Apply the Jacobian of the phase to the vector GRAD
+     * @param grad
+     * @return J(grad)
+     */
+    abstract public DoubleShapedVector apply_J_phase(ShapedVector grad);
+
+    /**
+     * Setter for the defocus
+     * @param defoc parameters
+     */
+    abstract public  void setDefocus(DoubleShapedVector defoc);
+    /**
+     * Setter for the modulus of the pupil
+     * @param modulus parameters
+     */
+    abstract public  void setModulus(DoubleShapedVector modulus);
+    /**
+     * Setter for the phase of the pupil
+     * @param phase parameters
+     */
+    abstract public  void setPhase(DoubleShapedVector phase);
+
+    /**
+     * free some memory
+     */
+    abstract public void freePSF();
+>>>>>>> Add comments
 
 
     /** Initialize the  PSF model containing parameters
      *  @param psfShape shape of the PSF array
      *  @param dxy lateral pixel size
      *  @param dz axial sampling step size
+<<<<<<< HEAD
      *  @param single single precision flag
+=======
+     * @param single enforce computation in float
+>>>>>>> Add comments
      */
     public MicroscopeModel(Shape psfShape,
             double dxy, double dz,
@@ -80,6 +144,7 @@ public abstract class MicroscopeModel
         this.single = single;
     }
 
+<<<<<<< HEAD
 
     /**
      * Launch internal routines to compute PSF
@@ -115,6 +180,44 @@ public abstract class MicroscopeModel
 
     /**
      * Setter for the single precision flag
+=======
+    /**
+     * Apply Jacobian of parameters in xspace to the vector grad
+     * @param grad input vector
+     * @param xspace vector space of the parameter
+     * @return J(x)
+     */
+    public DoubleShapedVector apply_Jacobian(ShapedVector grad, ShapedVectorSpace xspace){
+        if(xspace ==  defocusSpace){
+            return apply_J_defocus( grad);
+        }else if(xspace ==  phaseSpace){
+            return apply_J_phase( grad);
+        }else if(xspace ==  modulusSpace){
+            return apply_J_modulus( grad);
+        }else{
+            throw new IllegalArgumentException("DoubleShapedVector grad does not belong to any space");
+        }
+    }
+
+    /**
+     * Setter for the parameters param according to the vectorspace it belongs to
+     * @param param
+     */
+    public  void setParam(DoubleShapedVector param) {
+        if(param.getOwner() ==  defocusSpace){
+            setDefocus(param);
+        }else if(param.getOwner() ==  phaseSpace){
+            setPhase(param);
+        }else if(param.getOwner() ==  modulusSpace){
+            setModulus(param);
+        }else{
+            throw new IllegalArgumentException("DoubleShapedVector param does not belong to any space");
+        }
+    }
+
+    /**
+     * Enforce single precision computation
+>>>>>>> Add comments
      * @param single
      */
     public void setSingle(boolean single){

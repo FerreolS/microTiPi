@@ -377,7 +377,7 @@ public class WideFieldModel extends MicroscopeModel{
             return apply_J_modulus( grad);
         }else{
             throw new IllegalArgumentException("DoubleShapedVector grad does not belong to any space");
-        }
+    }
     }
 
     @Override
@@ -1858,7 +1858,7 @@ public class WideFieldModel extends MicroscopeModel{
     public void setNPhase(int nPh ) {
         nPhase = nPh;
         setNPhase();
-    }
+            }
 
 
 
@@ -1870,7 +1870,7 @@ public class WideFieldModel extends MicroscopeModel{
         nModulus = nMod ;
 
         setNModulus();
-    }
+            }
 
     /**
      * Set the number of modulus coefficients
