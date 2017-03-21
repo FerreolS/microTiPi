@@ -3,6 +3,8 @@ package microTiPi.biphoton;
 import microTiPi.epifluorescence.WideFieldModel;
 import microTiPi.microscopy.MicroscopeModel;
 import mitiv.array.Array3D;
+import mitiv.array.Double3D;
+import mitiv.array.Float3D;
 import mitiv.base.Shape;
 import mitiv.linalg.shaped.DoubleShapedVector;
 import mitiv.linalg.shaped.ShapedVector;
@@ -16,7 +18,7 @@ import mitiv.linalg.shaped.ShapedVectorSpace;
  */
 public class BiPhotonModel extends MicroscopeModel {
 
-    WideFieldModel pupil;
+    WideFieldModel wfPSF;
     /**
      * @param psfShape  shape of the PSF
      * @param NA        numerical aperture
@@ -47,11 +49,22 @@ public class BiPhotonModel extends MicroscopeModel {
     public BiPhotonModel(Shape psfShape,int nPhase, int nModulus,
             double NA, double lambda, double ni, double dxy, double dz, boolean radial, boolean single) {
         super(psfShape, dxy, dz, single);
-        pupil = new WideFieldModel(psfShape, nPhase, nModulus, NA, lambda, ni, dxy, dz, radial, single);
+        wfPSF = new WideFieldModel(psfShape, nPhase, nModulus, NA, lambda, ni, dxy, dz, radial, single);
     }
     @Override
     public
     void computePSF() {
+        wfPSF.computePSF();
+        if (PState>0)
+            return;
+        if(single){
+            psf = Float3D.create( psfShape);
+
+        }else{
+            psf = Double3D.create( psfShape);
+
+        }
+        PState = 1;
         // TODO Auto-generated method stub
 
     }
@@ -61,8 +74,10 @@ public class BiPhotonModel extends MicroscopeModel {
      */
     @Override
     public Array3D getPSF() {
-        // TODO Auto-generated method stub
-        return null;
+        if (PState<1){
+            computePSF();
+        }
+        return psf;
     }
 
     /* (non-Javadoc)
@@ -70,7 +85,7 @@ public class BiPhotonModel extends MicroscopeModel {
      */
     @Override
     public void setParam(DoubleShapedVector param) {
-        // TODO Auto-generated method stub
+        wfPSF.setParam(param);
 
     }
 
@@ -88,7 +103,8 @@ public class BiPhotonModel extends MicroscopeModel {
      */
     @Override
     public void freePSF() {
-        // TODO Auto-generated method stub
+        PState =0;
+        psf = null;
 
     }
 }
