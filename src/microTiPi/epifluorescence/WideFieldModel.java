@@ -377,7 +377,7 @@ public class WideFieldModel extends MicroscopeModel{
             return apply_J_modulus( grad);
         }else{
             throw new IllegalArgumentException("DoubleShapedVector grad does not belong to any space");
-    }
+        }
     }
 
     @Override
@@ -399,7 +399,7 @@ public class WideFieldModel extends MicroscopeModel{
      * @param q : the gradient of some criterion in the PSF space
      * @return the gradient of this criterion in the modulus coefficients space.
      */
-    public  DoubleShapedVector apply_J_modulus(final ShapedVector q)
+    private  DoubleShapedVector apply_J_modulus(final ShapedVector q)
     {
         int Ci;
         final int Npix = Nx*Ny;
@@ -708,7 +708,7 @@ public class WideFieldModel extends MicroscopeModel{
      * @param q : the gradient of some criterion in the PSF space
      * @return the gradient of this criterion in the phase coefficients space.
      */
-    public DoubleShapedVector apply_J_phase(ShapedVector q)
+    private DoubleShapedVector apply_J_phase(ShapedVector q)
     {
         int Ci;
         final int Npix = Nx*Ny;
@@ -999,7 +999,7 @@ public class WideFieldModel extends MicroscopeModel{
      * @param q : the gradient of some criterion in the PSF space
      * @return the gradient of this criterion in the defocus coefficients space.
      */
-    public DoubleShapedVector apply_J_defocus(ShapedVector q)
+    private DoubleShapedVector apply_J_defocus(ShapedVector q)
     {
         double scale_x = 1/(Nx*dxy);
         double scale_y = 1/(Ny*dxy);
@@ -1858,7 +1858,7 @@ public class WideFieldModel extends MicroscopeModel{
     public void setNPhase(int nPh ) {
         nPhase = nPh;
         setNPhase();
-            }
+    }
 
 
 
@@ -1870,7 +1870,7 @@ public class WideFieldModel extends MicroscopeModel{
         nModulus = nMod ;
 
         setNModulus();
-            }
+    }
 
     /**
      * Set the number of modulus coefficients
@@ -1926,6 +1926,14 @@ public class WideFieldModel extends MicroscopeModel{
      */
     public int getNPhase() {
         return parameterCoefs[PHASE].getNumber();
+    }
+
+
+    /**
+     * @return
+     */
+    public DoubleShapedVector getDefocusCoefs() {
+        return parameterCoefs[DEFOCUS];
     }
 
 
