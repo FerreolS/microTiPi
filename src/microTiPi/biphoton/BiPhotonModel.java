@@ -3,10 +3,6 @@ package microTiPi.biphoton;
 import microTiPi.epifluorescence.WideFieldModel;
 import microTiPi.microscopy.MicroscopeModel;
 import mitiv.array.Array3D;
-import mitiv.array.Double3D;
-import mitiv.array.DoubleArray;
-import mitiv.array.Float3D;
-import mitiv.array.FloatArray;
 import mitiv.array.impl.FlatDouble3D;
 import mitiv.array.impl.FlatFloat3D;
 import mitiv.base.Shape;
@@ -32,8 +28,6 @@ public class BiPhotonModel extends MicroscopeModel {
     protected int nModulus;
     protected int nDefocus;
     protected int nPhase;
-
-    double scale =1.;
 
     /**
      * index of defocus parameter space
@@ -80,8 +74,11 @@ public class BiPhotonModel extends MicroscopeModel {
         super(psfShape, dxy, dz, single);
         wfPSF = new WideFieldModel(psfShape, nPhase, nModulus, NA, lambda, ni, dxy, dz, radial, single);
 
+
         parameterSpace = new DoubleShapedVectorSpace[3];
         parameterCoefs = new DoubleShapedVector[3];
+
+
 
         parameterSpace[DEFOCUS] =  wfPSF.getDefocusCoefs().getOwner();
         parameterCoefs[DEFOCUS] = wfPSF.getDefocusCoefs();
@@ -91,15 +88,7 @@ public class BiPhotonModel extends MicroscopeModel {
             nModulus = 1;
         }
         setNModulus(nModulus);
-        computePSF();
-        scale = 1./ ((DoubleArray) psf).sum();
-        if(single){
-            ((FloatArray) psf).scale( (float) scale);
-        }else{
-            ((DoubleArray) psf).scale( scale);
-        }
     }
-
     @Override
     public
     void computePSF() {
@@ -115,8 +104,6 @@ public class BiPhotonModel extends MicroscopeModel {
                     return arg*arg;
                 }
             });
-            ((Float3D) psf).scale((float) scale);
-            //    ((Float3D) psf).scale((float) (1./((Float3D) psf).sum()));
         }else{
             psf = wfPSF.getPSF().copy();
             psf.flatten();
@@ -126,10 +113,9 @@ public class BiPhotonModel extends MicroscopeModel {
                     return arg*arg;
                 }
             });
-            ((Double3D) psf).scale(scale);
-            //   ((Double3D) psf).scale(1./((Double3D) psf).sum());
         }
         PState = 1;
+
     }
 
     /* (non-Javadoc)
@@ -150,6 +136,7 @@ public class BiPhotonModel extends MicroscopeModel {
     public void setParam(DoubleShapedVector param) {
         wfPSF.setParam(param);
         PState = 0;
+
     }
 
     /* (non-Javadoc)
@@ -157,16 +144,34 @@ public class BiPhotonModel extends MicroscopeModel {
      */
     @Override
     public DoubleShapedVector apply_Jacobian(ShapedVector grad, ShapedVectorSpace xspace) {
+        // psf= h(param)^2
+        // dh /param  -> wfPSF.apply_Jacobian(grad, xspace);
+        // dpsf /dh = 2 h
+
         if(single){
-            Float3D psf2 = (Float3D) wfPSF.getPSF().copy();
-            psf2.scale((float) (2.*scale));
+            FlatFloat3D psf2 = (FlatFloat3D) wfPSF.getPSF().copy();
+            psf2.map(new FloatFunction(){
+                @Override
+                public float apply(float arg) {
+                    return 2*arg;
+                }
+            });
             ((FloatShapedVector) grad).multiply(grad.getSpace().create(psf2));
         }
         else{
-            Double3D psf2 = (Double3D) wfPSF.getPSF().copy();
-            psf2.scale(2.*scale);
+            FlatDouble3D psf2 = (FlatDouble3D) wfPSF.getPSF().copy();
+            psf2.map(new DoubleFunction(){
+                @Override
+                public double apply(double arg) {
+                    return 2*arg;
+                }
+            });
             ((DoubleShapedVector) grad).multiply(grad.getSpace().create(psf2));
+
+
         }
+
+        // TODO Auto-generated method stub
         return wfPSF.apply_Jacobian(grad, xspace);
     }
 
@@ -177,6 +182,7 @@ public class BiPhotonModel extends MicroscopeModel {
     public void freePSF() {
         PState =0;
         psf = null;
+
     }
 
     /**
@@ -308,16 +314,6 @@ public class BiPhotonModel extends MicroscopeModel {
      */
     public Double getNi() {
         return wfPSF.getNi();
-    }
-
-    public double getScale(){
-        return scale;
-    }
-    public void setScale(double scl){
-        scale = scl;
-    }
-    public void updateScale(double updt){
-        scale *= updt;
     }
 }
 
